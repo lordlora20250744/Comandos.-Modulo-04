@@ -1,0 +1,88 @@
+Practica 1: Instalar un servidor HTTP apache2/nginx
+sudo apt update
+sudo apt install apache2 -y
+
+sudo systemctl start apache2
+sudo systemctl enable apache2
+sudo systemctl status apache2
+
+sudo mkdir -p /var/www/html
+sudo chown -R $USER:$USER /var/www/html
+
+sudo nano /var/www/html/index.html
+
+sudo nano /etc/apache2/sites-available/000-default.conf
+
+sudo nano /etc/hosts
+
+sudo nano /etc/apache2/ports.conf
+
+sudo mkdir -p /var/www/datos
+sudo chown -R $USER:$USER /var/www/datos
+nano /var/www/datos/index.html
+
+sudo nano /etc/apache2/sites-available/datos.conf
+
+sudo a2ensite datos.conf
+
+sudo systemctl restart apache2
+
+firefox http://localhost
+firefox http://localhost:8080
+_______________________________________________
+
+Practica 2: Instalar un servidor de correos
+sudo apt update
+sudo apt install postfix -y
+
+sudo nano /etc/hosts
+
+sudo nano /etc/postfix/main.cf
+
+sudo nano /etc/postfix/sasl_passwd
+
+sudo chmod 600 /etc/postfix/sasl_passwd
+
+sudo postmap /etc/postfix/sasl_passwd
+
+sudo chmod 600 /etc/postfix/sasl_passwd.db
+
+sudo apt install libsasl2-modules -y
+
+sudo systemctl restart postfix
+sudo systemctl start postfix
+sudo systemctl status postfix
+
+sudo apt install mailutils -y
+
+echo "Nombre: Lord Lora
+Matricula: 20250744" | mail -s "MambruSeFueALaGuerra" os3conadrian@gmail.com
+
+mailq
+_______________________________________________
+
+Practica 3: Instalar un servidor de Impresion
+sudo apt update
+sudo apt install cups cups-pdf ufw -y
+
+sudo systemctl enable cups
+sudo systemctl start cups
+sudo systemctl status cups
+
+sudo nano /etc/cups/cupsd.conf
+sudo nano /etc/cups/cups-files.conf
+
+sudo systemctl restart cups
+
+mkdir ~/PDF
+
+sudo usermod -aG lpadmin sistemas3
+
+sudo ufw enable
+sudo ufw allow 631/tcp
+sudo ufw reload
+sudo ufw status
+
+sudo tail -20 /var/log/cups/error_log
+
+ip a
