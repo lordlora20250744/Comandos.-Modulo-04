@@ -1,0 +1,206 @@
+# =========================
+# PRACTICA 1 - Servidor HTTP Apache2
+# =========================
+
+sudo apt update
+# Actualiza repositorios
+
+sudo apt install apache2 -y
+# Instala Apache2
+
+
+# ===== Primera parte: sitio en puerto 80 =====
+
+cd /etc/apache2/sites-available
+# Entrar a la carpeta de sitios disponibles
+
+sudo nano holamundo.conf
+# Crear virtual host principal
+
+<VirtualHost *:80>
+    ServerAdmin admin@midominio.local
+    ServerName holamundo.local
+    ServerAlias www.holamundo.local
+    DocumentRoot /var/www/holamundo.local
+
+    <Directory /var/www/holamundo.local>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/holamundo_error.log
+    CustomLog ${APACHE_LOG_DIR}/holamundo_access.log combined
+</VirtualHost>
+
+sudo mkdir -p /var/www/holamundo.local
+# Crear carpeta del sitio
+
+sudo nano /var/www/holamundo.local/index.html
+# Crear página principal
+
+<html>
+<title>
+Hola Mundo
+</title>
+<body>
+<h1>
+Hola Mundo
+</h1>
+</body>
+</html>
+
+sudo a2ensite holamundo.conf
+# Habilitar sitio
+
+sudo systemctl reload apache2
+# Recargar Apache
+
+sudo nano /etc/hosts
+# Registrar dominio local
+
+127.0.0.1 holamundo.local
+
+
+# ===== Segunda parte: sitio en puerto 8080 =====
+
+sudo nano /etc/apache2/ports.conf
+# Agregar nuevo puerto
+
+Listen 8080
+
+sudo nano /etc/apache2/sites-available/sistemas3.conf
+# Crear segundo virtual host
+
+<VirtualHost *:8080>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/sistemas3
+    ServerName sistemas3.local
+    ErrorLog ${APACHE_LOG_DIR}/error8080.log
+    CustomLog ${APACHE_LOG_DIR}/access8080.log combined
+</VirtualHost>
+
+sudo mkdir -p /var/www/sistemas3
+# Crear carpeta del segundo sitio
+
+sudo nano /var/www/sistemas3/index.html
+# Crear contenido del segundo sitio
+
+Nombre: Lord Lora
+Matricula: 20250744
+Materia: Sistemas Operativos 3
+
+sudo a2ensite sistemas3.conf
+# Activar segundo sitio
+
+sudo systemctl restart apache2
+# Reiniciar Apache
+
+sudo nano /etc/hosts
+# Registrar dominio local
+
+127.0.0.1 sistemas3.local
+
+
+# =========================
+# PRACTICA 2 - Servidor de correos Postfix
+# =========================
+
+sudo apt update
+# Actualiza repositorios
+
+sudo apt install postfix mailutils libsasl2-modules -y
+# Instala Postfix y utilidades de correo
+
+sudo nano /etc/postfix/main.cf
+# Editar configuración principal
+
+# CONFIGURACION BASICA
+myhostname = localhost
+mydomain = localhost
+myorigin = $mydomain
+
+# REDES Y DESTINOS
+inet_interfaces = localhost
+mynetworks = 127.0.0.0/8 [::1]/128
+mydestination = $myhostname, localhost
+
+# RELAY GMAIL
+relayhost = [smtp.gmail.com]:587
+
+# AUTENTICACIÓN GMAIL
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+smtp_sasl_mechanism_filter = plain
+
+# SEGURIDAD TLS
+smtp_use_tls = yes
+smtp_tls_security_level = encrypt
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+
+# ALIASES
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+
+sudo nano /etc/postfix/sasl_passwd
+# Agregar credenciales SMTP
+
+[smtp.gmail.com]:587 lordlora@gmail.com:tu_contraseña_de_aplicacion
+
+sudo chmod 600 /etc/postfix/sasl_passwd
+# Proteger archivo de credenciales
+
+sudo postmap /etc/postfix/sasl_passwd
+# Crear hash del archivo
+
+sudo systemctl restart postfix
+# Reiniciar Postfix
+
+echo "holaaaa" | mail -s "El asunto" lordlora@gmail.com
+# Enviar correo de prueba
+
+
+# =========================
+# PRACTICA 3 - Servidor de impresión CUPS
+# =========================
+
+sudo apt update
+# Actualiza repositorios
+
+sudo apt install cups cups-pdf -y
+# Instala CUPS y PDF virtual printer
+
+sudo usermod -aG lpadmin sistemas3
+# Agrega tu usuario de Kali al grupo administrador de impresión
+
+sudo systemctl start cups
+# Inicia servicio CUPS
+
+sudo systemctl enable cups
+# Habilita inicio automático
+
+cupsctl --remote-admin --remote-any --share-printers
+# Permite acceso remoto y compartir impresoras
+
+# Acceder al panel web:
+# http://127.0.0.1:631
+
+# Iniciar sesión con:
+# usuario: sistemas3
+# contraseña: la del sistema
+
+# Crear impresora nueva:
+# seleccionar CUPS-PDF
+# permitir compartir
+# driver generic
+# CUPS-PDF Generic no-config
+
+# Los PDF se guardarán en:
+# /home/sistemas3/PDF/
+
+ip a
+# Ver la IP de Kali para agregar impresora en Windows
+
+# En Windows agregar impresora manual:
+# http://TU_IP:631/printers/NOMBRE-IMPRESORA
