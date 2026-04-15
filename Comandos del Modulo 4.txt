@@ -1,88 +1,215 @@
-Practica 1: Instalar un servidor HTTP apache2/nginx
+# =========================
+# Practica 1: Instalar un servidor HTTP apache2/nginx
+# =========================
+
 sudo apt update
+# Actualiza la lista de paquetes
+
 sudo apt install apache2 -y
+# Instala el servidor web Apache2
 
 sudo systemctl start apache2
+# Inicia el servicio Apache
+
 sudo systemctl enable apache2
+# Habilita Apache al iniciar el sistema
+
 sudo systemctl status apache2
+# Verifica el estado del servicio
 
 sudo mkdir -p /var/www/html
+# Crea la carpeta raíz del sitio web si no existe
+
 sudo chown -R $USER:$USER /var/www/html
+# Da propiedad de la carpeta al usuario actual
 
 sudo nano /var/www/html/index.html
+# Crear la página principal del sitio
+
+# Dentro de nano:
+<html>
+<head><title>Mi servidor Apache</title></head>
+<body>
+<h1>Servidor HTTP funcionando</h1>
+</body>
+</html>
 
 sudo nano /etc/apache2/sites-available/000-default.conf
+# Editar la configuración principal del sitio
+
+# Dentro de nano verificar o modificar:
+DocumentRoot /var/www/html
 
 sudo nano /etc/hosts
+# Agregar resolución local de nombre
+
+# Dentro de nano agregar:
+127.0.0.1 localhost
+127.0.1.1 sistemas3
 
 sudo nano /etc/apache2/ports.conf
+# Cambiar o agregar puerto adicional
+
+# Dentro de nano agregar:
+Listen 8080
 
 sudo mkdir -p /var/www/datos
+# Crear carpeta para segundo sitio
+
 sudo chown -R $USER:$USER /var/www/datos
+# Dar permisos al usuario
+
 nano /var/www/datos/index.html
+# Crear la página del segundo sitio
+
+# Dentro de nano:
+<html>
+<head><title>Datos</title></head>
+<body>
+<h1>Sitio datos en puerto 8080</h1>
+</body>
+</html>
 
 sudo nano /etc/apache2/sites-available/datos.conf
+# Crear configuración del segundo sitio
+
+# Dentro de nano:
+<VirtualHost *:8080>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/datos
+</VirtualHost>
 
 sudo a2ensite datos.conf
+# Habilita el nuevo sitio virtual
 
 sudo systemctl restart apache2
+# Reinicia Apache para aplicar cambios
 
 firefox http://localhost
-firefox http://localhost:8080
-_______________________________________________
+# Probar sitio principal
 
-Practica 2: Instalar un servidor de correos
+firefox http://localhost:8080
+# Probar segundo sitio
+
+
+# =========================
+# Practica 2: Instalar un servidor de correos
+# =========================
+
 sudo apt update
+# Actualiza paquetes
+
 sudo apt install postfix -y
+# Instala el servidor de correo Postfix
 
 sudo nano /etc/hosts
+# Configurar nombre local del host
+
+# Dentro de nano:
+127.0.0.1 localhost
+127.0.1.1 sistemas3
 
 sudo nano /etc/postfix/main.cf
+# Editar configuración principal de Postfix
+
+# Dentro de nano agregar o verificar:
+relayhost = [smtp.gmail.com]:587
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+smtp_tls_security_level = encrypt
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
 
 sudo nano /etc/postfix/sasl_passwd
+# Crear archivo con credenciales SMTP
+
+# Dentro de nano:
+[smtp.gmail.com]:587 correo@gmail.com:contraseña
 
 sudo chmod 600 /etc/postfix/sasl_passwd
+# Protege el archivo de credenciales
 
 sudo postmap /etc/postfix/sasl_passwd
+# Genera la base de datos hash del archivo de credenciales
 
 sudo chmod 600 /etc/postfix/sasl_passwd.db
+# Protege la base de datos generada
 
 sudo apt install libsasl2-modules -y
+# Instala módulos SASL necesarios para autenticación
 
 sudo systemctl restart postfix
-sudo systemctl start postfix
+# Reinicia Postfix
+
 sudo systemctl status postfix
+# Verifica el estado del servicio
 
 sudo apt install mailutils -y
+# Instala herramienta para enviar correos desde terminal
 
 echo "Nombre: Lord Lora
 Matricula: 20250744" | mail -s "MambruSeFueALaGuerra" os3conadrian@gmail.com
+# Envía correo de prueba
 
 mailq
-_______________________________________________
+# Verifica la cola de correos
 
-Practica 3: Instalar un servidor de Impresion
+
+# =========================
+# Practica 3: Instalar un servidor de Impresion
+# =========================
+
 sudo apt update
+# Actualiza paquetes
+
 sudo apt install cups cups-pdf ufw -y
+# Instala CUPS, impresora PDF y firewall
 
 sudo systemctl enable cups
+# Habilita CUPS al inicio
+
 sudo systemctl start cups
+# Inicia el servicio
+
 sudo systemctl status cups
+# Verifica estado
 
 sudo nano /etc/cups/cupsd.conf
+# Configurar acceso web de CUPS
+
+# Dentro de nano revisar o agregar:
+Listen 631
+WebInterface Yes
+
 sudo nano /etc/cups/cups-files.conf
+# Configurar archivos y permisos de CUPS
+
+# Dentro de nano verificar:
+SystemGroup lpadmin
 
 sudo systemctl restart cups
+# Reinicia CUPS
 
 mkdir ~/PDF
+# Crea carpeta para PDFs generados
 
 sudo usermod -aG lpadmin sistemas3
+# Da permisos administrativos de impresión al usuario
 
 sudo ufw enable
+# Activa firewall
+
 sudo ufw allow 631/tcp
+# Permite tráfico del puerto de impresión
+
 sudo ufw reload
+# Recarga reglas del firewall
+
 sudo ufw status
+# Verifica reglas activas
 
 sudo tail -20 /var/log/cups/error_log
+# Muestra últimos errores del servicio CUPS
 
 ip a
+# Ver la IP para acceder remotamente al servidor de impresión
